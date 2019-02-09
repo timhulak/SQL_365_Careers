@@ -8,10 +8,25 @@ FROM
 	table_name
 WHERE
 	condition
+    (AND comes before OR and parentesis help with execution order)
 ;
 
 */
+/*
 
+Wildcard Charachters:
+
+% : a substitute for a sequence of characters 
+
+_ : match a single character 
+
+* : delivers a list of ALL columns in a table
+
+
+*/
+
+/* PART 1
+   Employee Information */
 -- Explore the "employees" table
 SELECT 
     *
@@ -92,7 +107,79 @@ FROM
 WHERE
     first_name = 'Kellie' AND gender = 'F';
 
+-- Select all of the employees who are named 
+-- Kellie or Aruna
+SELECT 
+    *
+FROM
+    employees
+WHERE
+    first_name = 'Kellie'
+        OR first_name = 'Aruna';
+        
+-- Retrieve a list with all female employees whose first name 
+-- is either Kellie or Aruna.
+SELECT 
+    *
+FROM
+    employees
+WHERE
+    gender = 'F'
+        AND (first_name = 'Kellie'
+        OR first_name = 'Aruna');
+        
+-- Find the records for Cathie, Mark, and Nathan 
+SELECT 
+    *
+FRM
+    employees
+WHERE
+    first_name IN ('Cathie' , 'Mark', 'Nathan');
+    
+-- Extract all records from the ‘employees’ table, aside from 
+-- those with employees named John, Mark, or Jacob.
+SELECT
+    *
+FROM
+    employees
+WHERE
+    first_name NOT IN ('John' , 'Mark', 'Jacob');
+    
+/* Working with the “employees” table, use the LIKE operator to
+select the data about all individuals, whose first name 
+starts with “Mark”; specify that the name can be succeeded 
+by any sequence of characters.
+*/
+SELECT
+    *
+FROM
+    employees
+WHERE
+    first_name LIKE('Mark%');
 
+-- Retrieve a list with all employees who have been hired in 
+-- the year 2000.
+
+SELECT
+    *
+FROM
+    employees
+WHERE
+    hire_date LIKE ('%2000%');
+    
+-- Retrieve a list with all employees whose employee number is 
+-- written with 5 characters, and starts with “1000”. 
+ 
+SELECT
+    *
+FROM
+    employees
+WHERE
+    emp_no LIKE ('1000_');
+
+
+/* PART 2
+   Department Information */
 -- Explore the "departments" table
 SELECT 
     *
@@ -104,4 +191,4 @@ SELECT
     COUNT(dept_no) AS "Total Departments"
 FROM
     departments;
--- 
+
