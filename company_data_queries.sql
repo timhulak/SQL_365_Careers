@@ -16,6 +16,8 @@ HAVING
 	condition with aggregate function
 ORDER BY
 	column
+LIMIT
+	number
 ;
 
 */
@@ -33,16 +35,80 @@ _ : match a single character
 
 /*
 Common Aggregate Functions:
+Gather data from many rows , then 
+aggregate into a single value.
+Sometimes called "Summarizing Functions"
+
 COUNT() counts non-null records in a columns
+	applicable to both numeric and 
+    non-numeric data.
+	COUNT(*) will return all values, including NULL values. 
+COUNT(DISTINCT ) finds the number of times a 
+	unique value appears in a column. 
 SUM() adds all non-null values in a column
 MIN() returns minimum value 
 MAX() returns maximum value
 AVG() returns the average of all non-null values
+ROUND(#,decimal places)
+IFNULL(expression_1(if not null), expression_2(if null)) AS name
+	must have 2 arguments 
+COALESCE(expression_1, expression_2,...expression_n) AS name 
+	IFNULL with more than 1,2, or more parameters 
+NOTE: Both IFNULL and COALESCE only change the output, not the data set. 
+*/
+
+/*
+Adding data
+
+NOTE: Make sure you know the data type of the 
+column you are adding into (INT, VARCHAR, etc.)
+
+INSERT INTO table_name(column_1, column_2, ... column_n)
+VALUES (value_1, value_2, ... valu3_n)
+;
+*/
+
+/*
+Updating existing date
+
+UPDATE table_name
+SET column_1 = value_1, column_n = value_n
+WHERE conditions; 
+*/
+
+/*
+Deleting a row of data 
+NOTE: If there are keys connecting tables,
+the record you are deleting will be deleted 
+from ALL tables it is connected to so long
+as the ON DELETE CASCADE constraint is there. 
+(Relational DataBases!)
+
+NOTE: If you do not include the WHERE clause,
+then you will delete the enitre table! 
+
+DELETE FROM table_name
+WHERE condition;
+*/
+
+/*
+DROP vs. TRUNCATE vs. DELETE
+
+DROP: permanantly deletes a table and cannot be 
+	recovered via COMMIT/ROLLBACK 
+
+TRUNCATE: deletes all records in a table, 
+	but the table will still exist. 
+    Auto-Increment values will be reset 
+
+DELETE: removes records row-by-row with WHERE Clause. 
+	If there is no WHERE clause, it will resemble 
+    TRUNCATE, but AUTO_INCREMENT vaues will NOT reset. 
 */
 
 /* 
 PART 1
-Employee Information 
+Exploration
 */
 
 -- Explore the "employees" table
@@ -451,43 +517,19 @@ HAVING AVG(salary) > 120000
 ORDER BY emp_no;
 
 /*
-
+Select the employee numbers of all individuals 
+who have signed more than 1 contract after the 
+1st of January 2000.
 */
-
-/*
-
-*/
-
-/*
-
-*/
-
-
-/*
-
-*/
-
-
-/*
-
-*/
-
-
-/*
-
-*/
-
-
-/*
-
-*/
-
-
--- --------------------------------------
-/* 
-PART 2
-Department Information 
-*/
+SELECT
+    emp_no
+FROM
+    dept_emp
+WHERE
+    from_date > '2000-01-01'
+GROUP BY emp_no
+HAVING COUNT(from_date) > 1
+ORDER BY emp_no;
 
 -- Explore the "departments" table
 SELECT 
@@ -511,4 +553,467 @@ FROM
     departments
 WHERE
     dept_no IS NOT NULL;
+    
+/*
+Select the first 100 rows from the ‘dept_emp’ table. 
+*/
+SELECT
+    *
+FROM
+    dept_emp
+LIMIT 100;
 
+-- ------------------------------------------------------------
+/* 
+PART 2
+Inserting Data
+*/
+SELECT 
+    *
+FROM
+    employees
+LIMIT 10;
+
+/*
+Add an employee into the employees table. 
+Their Info is:
+Employee ID: 999903
+Birth Date: 1977-09-14
+First Name: Johnathan
+Last Name: Creek
+Gender: M
+Hire Date: 1999-01-01
+*/
+INSERT INTO employees
+VALUES
+(999903,
+'1977-09-14',
+'Johnathan',
+'Creek',
+'M',
+'1999-01-01'
+);
+
+/*
+Select ten records from the “titles” 
+table to get a better idea about its content.
+
+Then, in the same table, insert information about 
+employee number 999903. State that he/she is a “Senior Engineer”, 
+who has started working in this position on October 1st, 1997.
+
+At the end, sort the records from the “titles” table in 
+descending order to check if you have successfully 
+inserted the new record.
+*/
+
+SELECT 
+    *
+FROM
+    titles
+LIMIT 10;
+
+INSERT INTO titles
+(emp_no,
+title,
+from_date)
+VALUES
+(999903,
+'Senior Engineer',
+'1997-10-01');
+
+SELECT
+    *
+FROM
+    titles
+ORDER BY emp_no DESC;
+
+/*
+Insert information about the individual with 
+employee number 999903 into the “dept_emp” table. 
+He is working for department number 5, and has 
+started work on  October 1st, 1997; his contract 
+is for an indefinite period of time (‘9999-01-01’).
+*/
+SELECT 
+    *
+FROM
+    dept_emp
+LIMIT 10;
+
+INSERT INTO dept_emp
+(emp_no, dept_no, from_date, to_date)
+VALUES 
+(999903, 'd005', '1997-10-01', '9999-01-01');
+
+
+/*
+Create a new department called “Business Analysis”. 
+Register it under number ‘d010’.
+*/
+SELECT 
+    *
+FROM
+    departments
+ORDER BY
+	dept_no;
+
+INSERT INTO departments 
+VALUES
+('d010', 'Business Analysis');
+
+-- ------------------------------------------------------------
+/* 
+PART 3
+UPDATE
+*/
+
+/*
+It turns out that there was a mistake in
+the request to add “Business Analysis” to 
+our departments table.
+Change the “Business Analysis” department name to “Data Analysis"
+*/
+
+UPDATE departments
+SET dept_name = 'Data Analysis'
+WHERE dept_no = 'd010';
+
+-- Check that it worked. 
+SELECT 
+    *
+FROM
+    departments
+ORDER BY
+	dept_no;
+
+-- ------------------------------------------------------------
+/* 
+PART 4
+DELETE 
+*/
+
+/*
+Remove the department number 10 record 
+from the “departments” table.
+*/
+DELETE FROM departments 
+WHERE dept_no = 'd010';
+
+SELECT 
+    *
+FROM
+    departments
+ORDER BY
+	dept_no
+LIMIT 10;
+
+-- ------------------------------------------------------------
+/* 
+PART 5
+Aggregate Functions:
+
+*/
+
+/*
+How many departments are there in the “employees” database? 
+Use the ‘dept_emp’ table to answer the question.
+*/
+SELECT 
+    COUNT(DISTINCT dept_no)
+FROM
+    dept_emp;
+
+/*
+How much does our company spend on 
+salaries?
+*/
+SELECT 
+    SUM(salary)
+FROM
+    salaries;
+
+/*
+What is the total amount of money spent on 
+salaries for all contracts starting after the 
+1st of January 1997?
+*/
+SELECT 
+    SUM(salary)
+FROM
+    salaries
+WHERE
+    from_date > '1997-01-01';
+
+/*
+Find the highest and lowest respective salary 
+*/
+SELECT 
+    MAX(salary)
+FROM
+    salaries;
+    
+SELECT 
+    MIN(salary)
+FROM
+    salaries;
+
+/*
+What is the average annual salary?
+Round to 2 decimal places
+*/
+SELECT 
+    ROUND(AVG(salary), 2) AS 'Average Salary'
+FROM
+    salaries;
+
+/*
+What is the average annual salary paid to employees
+ who started after the 1st of January 1997?
+ Round to 2 decimal places
+*/
+SELECT 
+    ROUND(AVG(salary),2)
+FROM
+    salaries
+WHERE
+    from_date > '1997-01-01';
+
+
+-- ------------------------------------------------------------
+/* 
+PART 6
+JOINs
+*/
+
+/*
+
+*/
+
+/*
+
+*/
+
+
+/*
+
+*/
+
+
+/*
+
+*/
+
+
+/*
+
+*/
+
+
+/*
+
+*/
+-- ------------------------------------------------------------
+/* 
+PART 7
+Subquieries 
+*/
+
+/*
+
+*/
+
+/*
+
+*/
+
+
+/*
+
+*/
+
+
+/*
+
+*/
+
+
+/*
+
+*/
+
+
+/*
+
+*/
+
+
+-- ------------------------------------------------------------
+/* 
+PART 8
+Self JOIN
+*/
+
+/*
+
+*/
+
+/*
+
+*/
+
+
+/*
+
+*/
+
+
+/*
+
+*/
+
+
+/*
+
+*/
+
+
+/*
+
+*/
+-- ------------------------------------------------------------
+/* 
+PART 9
+Views
+*/
+
+/*
+
+*/
+
+/*
+
+*/
+
+
+/*
+
+*/
+
+
+/*
+
+*/
+
+
+/*
+
+*/
+
+
+/*
+
+*/
+
+
+-- ------------------------------------------------------------
+/* 
+PART 10
+Stores Routines
+*/
+
+/*
+
+*/
+
+/*
+
+*/
+
+
+/*
+
+*/
+
+
+/*
+
+*/
+
+
+/*
+
+*/
+
+
+/*
+
+*/
+-- ------------------------------------------------------------
+/* 
+PART 11
+Advanced SQL Topics
+*/
+
+/*
+
+*/
+
+/*
+
+*/
+
+
+/*
+
+*/
+
+
+/*
+
+*/
+
+
+/*
+
+*/
+
+
+/*
+
+*/
+
+
+-- ------------------------------------------------------------
+/* 
+PART 12
+Visualization Combining SQL and Tableau
+*/
+
+/*
+
+*/
+
+/*
+
+*/
+
+
+/*
+
+*/
+
+
+/*
+
+*/
+
+
+/*
+
+*/
+
+
+/*
+
+*/
